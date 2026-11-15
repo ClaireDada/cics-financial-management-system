@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CICS Student Government Finance System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=20261113_05">
+</head>
+<body>
+
+    <div class="dashboard-layout">
+
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar">
+            <div class="brand">
+                <img src="{% static 'images/cics_logo.png' %}" alt="CICS Logo" class="brand-logo-img">
+                <div class="brand-text">
+                    <h2>CICS SG</h2>
+                    <p>STUDENT FINANCE SYSTEM</p>
+                </div>
+            </div>
+
+            <p class="menu-label">FINANCE MENU</p>
+
+            <nav class="navigation">
+                {% include "accounts/dashboards/_sidebar_nav.html" %}
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user-avatar">
+                    {{ user.username|slice:":2"|upper }}
+                </div>
+                <div class="sidebar-user-info">
+                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                    <small>{{ role_name|default:"Member" }}</small>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN CONTENT ================= -->
+        <main class="main-content">
+
+            <!-- Topbar Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <span class="topbar-breadcrumb">CICS STUDENT GOVERNMENT</span>
+                    <h1 class="topbar-title">{% block page_heading %}Overview{% endblock %}</h1>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Refresh Button -->
+                    <button type="button" class="btn-icon" onclick="location.reload()" title="Refresh">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Password Pill -->
+                    <a href="javascript:void(0)" onclick="alert('Password management: Contact system administrator.')" class="topbar-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                            <path d="M21 2l-9.6 9.6"></path>
+                            <path d="M15.5 7.5l3 3L22 7l-3-3"></path>
+                        </svg>
+                        <span>Password</span>
+                    </a>
+
+                    <!-- User Capsule -->
+                    <div class="topbar-user">
+                        <div class="topbar-user-avatar">
+                            {{ user.username|slice:":2"|upper }}
+                        </div>
+                        <div class="topbar-user-info">
+                            <strong>{{ user.get_full_name|default:user.username }}</strong>
+                            <small>{{ role_name|default:"Member" }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Sign Out Button -->
+                    <form method="POST" action="{% url 'logout' %}" style="display:inline; margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="topbar-signout-btn">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            <span>Sign out</span>
+                        </button>
+                    </form>
+                </div>
+            </header>
+
+            <!-- Page Body Area -->
+            <section class="content-area">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Overview Hero & Workflow (Shown on Main Dashboard) -->
+                {% if request.resolver_match.url_name == 'dashboard' %}
+                <div class="hero-section">
+                    <h1>CICS Student Government Finance System</h1>
+                    <p>Welcome, {{ user.get_full_name|default:user.username }}. See student payments, approved budgets, and how organization funds are used.</p>
+                </div>
+
+                <!-- Informational Banner Callout -->
+                <div class="info-callout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="7" y1="17" x2="17" y2="7"></line>
+                        <polyline points="7 7 17 7 17 17"></polyline>
+                    </svg>
+                    <div>
+                        <strong>This system tracks money in and money out.</strong> Record student fee payments, plan budgets, approve spending requests, and keep receipts for every release.
+                    </div>
+                </div>
+
+                <!-- What to do next workflow steps -->
+                {% block workflow_section %}
+                <div class="action-card-container">
+                    <div class="action-card-header">
+                        <h2>What to do next</h2>
+                        <p>Start here: set up fees, record payments, approve spending, then check the records.</p>
+                    </div>
+                    <div class="workflow-grid">
+                        <div class="workflow-card">
+                            <h4>1. Set up fees and students</h4>
+                            <p>Add the school term, fee amounts, and student list.</p>
+                            <a href="{% url 'student_list' %}" class="btn-step">Set up student fees</a>
+                        </div>
+                        <div class="workflow-card">
+                            <h4>2. Record student payments</h4>
+                            <p>Record each payment and give the student a receipt.</p>
+                            <a href="{% url 'record_payment' %}" class="btn-step">Record a payment</a>
+                        </div>
+                        <div class="workflow-card">
+                            <h4>3. Plan and approve spending</h4>
+                            <p>Create a budget, request money, and get approvals.</p>
+                            <a href="{% url 'budget_list' %}" class="btn-step">Open budgets</a>
+                        </div>
+                        <div class="workflow-card">
+                            <h4>4. Pay out and check receipts</h4>
+                            <p>Record released funds and check submitted receipts.</p>
+                            <a href="{% url 'disbursements_list' %}" class="btn-step">Track spending</a>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+                {% endif %}
+
+                <!-- Role Specific Content Block -->
+                {% block dashboard_content %}
+                {% endblock %}
+
+            </section>
+
+            <footer class="dashboard-footer">
+                <span>CICS Student Government Financial Management System • St. Joseph's College of Baggao</span>
+                <span>© 2026</span>
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>

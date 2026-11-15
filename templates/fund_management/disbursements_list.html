@@ -1,0 +1,174 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Disbursements & Cash Releases | CICS SG{% endblock %}
+
+{% block page_heading %}Disbursements & Cash Releases{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Treasurer" %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link">
+    <span>📥</span> Turnovers
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link active">
+    <span>💰</span> Fund Releases
+</a>
+<a href="{% url 'liquidations_list' %}" class="nav-link">
+    <span>🧾</span> Liquidations
+</a>
+<a href="{% url 'returns_list' %}" class="nav-link">
+    <span>↩</span> Fund Returns
+</a>
+{% elif role_name == "Officer" %}
+<a href="{% url 'fund_requests_list' %}" class="nav-link">
+    <span>📋</span> My Fund Requests
+</a>
+<a href="{% url 'fund_request_create' %}" class="nav-link">
+    <span>➕</span> Submit Fund Request
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link active">
+    <span>💰</span> My Disbursements
+</a>
+<a href="{% url 'liquidations_list' %}" class="nav-link">
+    <span>🧾</span> Recorded Expenses
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'fund_requests_list' %}" class="nav-link">
+    <span>📋</span> Fund Requests
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link active">
+    <span>💰</span> Disbursements
+</a>
+<a href="{% url 'audit_logs' %}" class="nav-link">
+    <span>📋</span> Audit Logs
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Disbursements & Cash Advance Ledger</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Reconciliation of released vouchers, liquidation expenses, returned balances, and outstanding officer cash.
+        </p>
+    </div>
+</div>
+
+<!-- Pending Releases Queue for Treasurer -->
+{% if role_name == "Treasurer" and pending_releases %}
+<div class="table-card" style="margin-bottom: 25px; border-left: 4px solid var(--accent);">
+    <div class="table-header-bar">
+        <div>
+            <h3>Authorized Requests Ready for Voucher Issuance</h3>
+            <p style="font-size: 12px; color: var(--muted); margin-top: 2px;">Governor-approved requests ready to disburse.</p>
+        </div>
+        <span class="badge badge-warning">{{ pending_releases.count }} Awaiting Release</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Req #</th>
+                    <th>Officer</th>
+                    <th>Budget Allocation Item</th>
+                    <th>Approved Amount</th>
+                    <th>Purpose</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in pending_releases %}
+                <tr>
+                    <td><strong>#{{ r.request_id }}</strong></td>
+                    <td>{{ r.requested_by.get_full_name|default:r.requested_by.username }}</td>
+                    <td>{{ r.item.description }}</td>
+                    <td><strong style="color: var(--primary);">&#8369;{{ r.amount|floatformat:2 }}</strong></td>
+                    <td>{{ r.purpose|truncatechars:45 }}</td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=r.request_id %}" class="btn btn-primary btn-sm">
+                            Issue Voucher & Disburse
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Disbursements Ledger Table -->
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Released Disbursements Ledger</h3>
+        <span class="badge badge-primary">{{ disbursement_rows|length }} Record{{ disbursement_rows|length|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Voucher #</th>
+                    <th>Recipient Officer</th>
+                    <th>Purpose / Request</th>
+                    <th>Amount Released</th>
+                    <th>Liquidated</th>
+                    <th>Returned</th>
+                    <th>Remaining Cash</th>
+                    <th>Date Released</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in disbursement_rows %}
+                <tr>
+                    <td><strong>{{ row.disbursement.voucher_number }}</strong></td>
+                    <td>{{ row.disbursement.received_by.get_full_name|default:row.disbursement.received_by.username }}</td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=row.disbursement.request.request_id %}">
+                            <strong>#{{ row.disbursement.request.request_id }}</strong>: {{ row.disbursement.request.purpose|truncatechars:35 }}
+                        </a>
+                    </td>
+                    <td><strong style="color: var(--primary);">&#8369;{{ row.balance.amount_released|floatformat:2 }}</strong></td>
+                    <td>&#8369;{{ row.balance.total_expenses|floatformat:2 }}</td>
+                    <td>&#8369;{{ row.balance.total_returns|floatformat:2 }}</td>
+                    <td>
+                        <span style="font-weight: 700; color: {% if row.balance.remaining_cash > 0 %}#c94343{% else %}#168653{% endif %};">
+                            &#8369;{{ row.balance.remaining_cash|floatformat:2 }}
+                        </span>
+                    </td>
+                    <td>{{ row.disbursement.released_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="{% url 'fund_request_detail' request_id=row.disbursement.request_id %}" class="btn btn-secondary btn-sm">
+                                View
+                            </a>
+                            {% if role_name == "Officer" and row.disbursement.received_by == user %}
+                            <a href="{% url 'record_liquidation' disbursement_id=row.disbursement.disbursement_id %}" class="btn btn-primary btn-sm">
+                                + Expense
+                            </a>
+                            <a href="{% url 'record_fund_return' disbursement_id=row.disbursement.disbursement_id %}" class="btn btn-secondary btn-sm">
+                                Return
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="empty-state">
+                        <span class="empty-state-icon">💰</span>
+                        <p>No disbursements recorded yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

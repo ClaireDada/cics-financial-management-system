@@ -1,0 +1,89 @@
+{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Students Directory | CICS SG{% endblock %}
+
+{% block page_heading %}Students Directory{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Treasurer" %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'student_list' %}" class="nav-link active">
+    <span>👥</span> Students Directory
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link">
+    <span>📥</span> Turnovers
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'student_list' %}" class="nav-link active">
+    <span>👥</span> Students Directory
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>CICS Enrolled Students Directory</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Enrolled student roster for fee campaign assessments and compliance clearance.
+        </p>
+    </div>
+</div>
+
+<form method="GET" class="filter-bar">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search by student no, full name, program, section..." style="min-width: 280px;">
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    {% if search_query %}
+        <a href="{% url 'student_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+    {% endif %}
+</form>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Students Roster</h3>
+        <span class="badge badge-primary">{{ students.count }} Student{{ students.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Student Number</th>
+                    <th>Full Name</th>
+                    <th>Program</th>
+                    <th>Year Level</th>
+                    <th>Section</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td><code>{{ s.student_no }}</code></td>
+                    <td><strong>{{ s.full_name }}</strong></td>
+                    <td>{{ s.program }}</td>
+                    <td>Year {{ s.year_level }}</td>
+                    <td>{{ s.section|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'student_payment_status' %}?student_id={{ s.student_id }}" class="btn btn-secondary btn-sm">
+                            View Clearance Statement
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-state">No students found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

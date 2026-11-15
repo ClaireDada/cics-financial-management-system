@@ -1,0 +1,96 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Fund Returns | CICS SG{% endblock %}
+
+{% block page_heading %}Fund Returns{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Treasurer" %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> Fund Releases
+</a>
+<a href="{% url 'returns_list' %}" class="nav-link active">
+    <span>↩</span> Fund Returns
+</a>
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Reports
+</a>
+{% elif role_name == "Officer" %}
+<a href="{% url 'fund_requests_list' %}" class="nav-link">
+    <span>📋</span> My Fund Requests
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> My Disbursements
+</a>
+<a href="{% url 'returns_list' %}" class="nav-link active">
+    <span>↩</span> Returned Funds
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> Disbursements
+</a>
+<a href="{% url 'returns_list' %}" class="nav-link active">
+    <span>↩</span> Fund Returns
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Returned Balances & Treasury Restorations</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Unused cash advance amounts returned by project officers and acknowledged by the Treasurer.
+        </p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Cash Returns Ledger</h3>
+        <span class="badge badge-primary">{{ returns.count }} Record{{ returns.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Return Date</th>
+                    <th>Voucher #</th>
+                    <th>Returned By</th>
+                    <th>Received By (Treasurer)</th>
+                    <th>Amount Returned</th>
+                    <th>Remarks</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in returns %}
+                <tr>
+                    <td>{{ r.return_date|date:"M d, Y" }}</td>
+                    <td><strong>{{ r.disbursement.voucher_number }}</strong></td>
+                    <td>{{ r.returned_by.get_full_name|default:r.returned_by.username }}</td>
+                    <td>{{ r.received_by.get_full_name|default:r.received_by.username }}</td>
+                    <td><strong style="color: #0284c7;">&#8369;{{ r.amount_returned|floatformat:2 }}</strong></td>
+                    <td>{{ r.remarks|default:"None" }}</td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=r.disbursement.request_id %}" class="btn btn-secondary btn-sm">
+                            Inspect
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-state">No cash returns recorded.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

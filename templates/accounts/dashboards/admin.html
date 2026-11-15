@@ -1,0 +1,269 @@
+﻿
+{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Admin Dashboard | CICS SG{% endblock %}
+
+{% block page_heading %}Administrator Dashboard{% endblock %}
+
+{% block navigation %}
+
+<a href="{% url 'user_management' %}" class="nav-link">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+    <span>User Management</span>
+</a>
+
+<a href="{% url 'collections_list' %}" class="nav-link {% if request.resolver_match.url_name == 'collections_list' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+        <line x1="2" y1="10" x2="22" y2="10"></line>
+    </svg>
+    <span>Collections</span>
+</a>
+
+<a href="{% url 'budget_list' %}" class="nav-link {% if request.resolver_match.url_name == 'budget_list' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="21" x2="21" y2="21"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+        <polyline points="5 6 12 3 19 6"></polyline>
+        <line x1="6" y1="10" x2="6" y2="21"></line>
+        <line x1="10" y1="10" x2="10" y2="21"></line>
+        <line x1="14" y1="10" x2="14" y2="21"></line>
+        <line x1="18" y1="10" x2="18" y2="21"></line>
+    </svg>
+    <span>Budgets</span>
+</a>
+
+<a href="{% url 'fund_requests_list' %}" class="nav-link {% if request.resolver_match.url_name == 'fund_requests_list' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        <path d="M9 14l2 2 4-4"></path>
+    </svg>
+    <span>Fund Requests</span>
+</a>
+
+<a href="{% url 'financial_overview' %}" class="nav-link {% if request.resolver_match.url_name == 'financial_overview' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <line x1="9" y1="18" x2="9" y2="15"></line>
+        <line x1="15" y1="18" x2="15" y2="9"></line>
+    </svg>
+    <span>Reports & Audit</span>
+</a>
+
+<a href="{% url 'audit_logs' %}" class="nav-link {% if request.resolver_match.url_name == 'audit_logs' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+    </svg>
+    <span>Audit Logs</span>
+</a>
+
+<a href="/admin/" class="nav-link">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+    <span>Django Admin</span>
+</a>
+
+{% endblock %}
+
+
+{% block dashboard_content %}
+
+<h3 style="margin-bottom: 18px;">System Overview</h3>
+
+<div class="dashboard-grid">
+
+    <div class="dashboard-card">
+        <h3>Total Users</h3>
+        <div class="value">{{ total_users }}</div>
+        <p>{{ active_users }} active accounts</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Registered Students</h3>
+        <div class="value">{{ total_students }}</div>
+        <p>{{ total_terms }} academic terms</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Collection Campaigns</h3>
+        <div class="value">{{ total_campaigns }}</div>
+        <p>{{ active_campaigns }} active campaigns</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Total Collections</h3>
+        <div class="value">&#8369;{{ total_collected|floatformat:2 }}</div>
+        <p>{{ total_collections }} recorded payments</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Total Budget</h3>
+        <div class="value">&#8369;{{ total_budget|floatformat:2 }}</div>
+        <p>{{ active_budgets }} active budgets</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Fund Requests</h3>
+        <div class="value">{{ total_fund_requests }}</div>
+        <p>{{ pending_requests }} awaiting approval</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Released Funds</h3>
+        <div class="value">&#8369;{{ total_released|floatformat:2 }}</div>
+        <p>{{ total_disbursements }} disbursements</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Recorded Expenses</h3>
+        <div class="value">&#8369;{{ total_expenses|floatformat:2 }}</div>
+        <p>Based on recorded liquidations</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Returned Funds</h3>
+        <div class="value">&#8369;{{ total_returns|floatformat:2 }}</div>
+        <p>Unused funds returned to Treasurer</p>
+    </div>
+
+</div>
+
+
+<div class="dashboard-card" style="margin-top: 20px;">
+
+    <h3>Collection Monitoring</h3>
+
+    <p>Pending turnovers:
+        <strong>{{ pending_turnovers }}</strong>
+    </p>
+
+    <p>Disputed turnovers:
+        <strong>{{ disputed_turnovers }}</strong>
+    </p>
+
+</div>
+
+
+<div class="dashboard-card" style="margin-top: 20px;">
+
+    <h3>Current Academic Term</h3>
+
+    {% if current_term %}
+
+        <p>
+            <strong>{{ current_term.school_year }}</strong>
+        </p>
+
+        <p>{{ current_term.semester }}</p>
+
+    {% else %}
+
+        <p>No current academic term has been configured.</p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="dashboard-card" style="margin-top: 20px;">
+
+    <h3>Recent System Activities</h3>
+
+    {% if recent_activities %}
+
+        <div style="overflow-x: auto;">
+
+            <table style="width: 100%; border-collapse: collapse;">
+
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 10px;">User</th>
+                        <th style="text-align: left; padding: 10px;">Action</th>
+                        <th style="text-align: left; padding: 10px;">Module</th>
+                        <th style="text-align: left; padding: 10px;">Description</th>
+                        <th style="text-align: left; padding: 10px;">Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for activity in recent_activities %}
+
+                    <tr>
+
+                        <td style="padding: 10px;">
+
+                            {% if activity.user %}
+
+                                {{ activity.user.get_full_name|default:activity.user.username }}
+
+                            {% else %}
+
+                                Deleted User
+
+                            {% endif %}
+
+                        </td>
+
+                        <td style="padding: 10px;">
+                            {{ activity.get_action_display }}
+                        </td>
+
+                        <td style="padding: 10px;">
+                            {{ activity.module }}
+                        </td>
+
+                        <td style="padding: 10px;">
+                            {{ activity.description }}
+                        </td>
+
+                        <td style="padding: 10px;">
+                            {{ activity.timestamp|date:"M d, Y H:i" }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p>No system activities recorded yet.</p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="dashboard-card" style="margin-top: 20px;">
+
+    <h3>Administrator Responsibilities</h3>
+
+    <p>
+        Manage user accounts, assign system roles, maintain system
+        records, and monitor system activities.
+    </p>
+
+</div>
+
+{% endblock %}
+

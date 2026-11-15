@@ -1,0 +1,52 @@
+{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Submit Turnover | CICS SG{% endblock %}
+
+{% block page_heading %}Submit Collection Turnover{% endblock %}
+
+{% block navigation %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link active">
+    <span>📥</span> Turnovers
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Remit Collected Student Fees</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Declare the total cash collections being physically submitted to the Treasurer.
+        </p>
+    </div>
+    <a href="{% url 'turnovers_list' %}" class="btn btn-secondary">
+        <span>←</span> Back to Turnovers
+    </a>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label" for="declared_amount">Total Declared Cash Amount (PHP) *</label>
+            <input type="number" step="0.01" min="1.00" name="declared_amount" id="declared_amount" class="form-control" placeholder="e.g. 5000.00" required>
+            <span class="form-text">State the exact total currency amount you are turning over to the Treasurer.</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="remarks">Remittance Notes</label>
+            <textarea name="remarks" id="remarks" rows="3" class="form-control" placeholder="Specify campaigns covered (e.g. CICS Day t-shirt fees for 3rd Year students)..."></textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'turnovers_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                Submit Turnover for Verification ➔
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

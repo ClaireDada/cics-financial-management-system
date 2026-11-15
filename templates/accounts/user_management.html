@@ -1,0 +1,194 @@
+{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}User Management | CICS SG Finance{% endblock %}
+
+{% block page_heading %}User Management & Access Control{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="section-header">
+    <div>
+        <h3>System Users & Role Privileges</h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">
+            Manage credentials, council role designations, and active access permissions for the CICS financial system.
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <a href="/admin/accounts/user/add/" class="btn btn-primary" target="_blank">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            <span>Add New User</span>
+        </a>
+        <a href="/admin/" class="btn btn-secondary" target="_blank">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Django Admin Backend</span>
+        </a>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 22px;">
+    <div class="dashboard-card" style="border-top: 3px solid var(--accent-blue);">
+        <h3>Total Registered Users</h3>
+        <div class="value">{{ total_users }}</div>
+        <small>Active accounts in system database</small>
+    </div>
+    <div class="dashboard-card" style="border-top: 3px solid var(--success);">
+        <h3>Active Logins</h3>
+        <div class="value" style="color: var(--success);">{{ active_users }}</div>
+        <small>Accounts eligible to sign in</small>
+    </div>
+    <div class="dashboard-card" style="border-top: 3px solid var(--primary-btn);">
+        <h3>Staff & Officers</h3>
+        <div class="value" style="color: var(--primary);">{{ staff_users }}</div>
+        <small>Admin & Executive council accounts</small>
+    </div>
+    <div class="dashboard-card" style="border-top: 3px solid var(--accent-orange);">
+        <h3>Student Accounts</h3>
+        <div class="value" style="color: var(--accent-orange);">{{ student_users }}</div>
+        <small>Constituent student logins</small>
+    </div>
+</div>
+
+<!-- Search & Role Filter Bar -->
+<div class="filter-bar">
+    <form method="GET" action="{% url 'user_management' %}" style="display: flex; gap: 10px; width: 100%; align-items: center; flex-wrap: wrap;">
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="Search username, full name, or email..." 
+            value="{{ search_query }}"
+            style="flex: 1; min-width: 240px;"
+        >
+        
+        <select name="role" style="min-width: 180px;">
+            <option value="">All Roles ({{ total_users }})</option>
+            {% for r in all_roles %}
+                <option value="{{ r.role_name }}" {% if selected_role == r.role_name %}selected{% endif %}>
+                    {{ r.role_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Filter</span>
+        </button>
+
+        {% if search_query or selected_role %}
+            <a href="{% url 'user_management' %}" class="btn btn-secondary btn-sm">
+                <span>Reset</span>
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Users Table -->
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>User Accounts List ({{ users|length }})</h3>
+        <span style="font-size: 12px; color: var(--text-muted);">
+            Showing results {% if selected_role %}for role: <strong>{{ selected_role }}</strong>{% endif %}
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Full Name</th>
+                    <th>Role Designation</th>
+                    <th>Email Address</th>
+                    <th>Status</th>
+                    <th>Staff Permission</th>
+                    <th>Last Active</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: #edf5fd; color: #164e87; font-weight: 800; font-size: 11px; display: flex; align-items: center; justify-content: center; border: 1px solid #dbeafe; flex-shrink: 0;">
+                                {{ u.username|slice:":2"|upper }}
+                            </div>
+                            <div>
+                                <strong style="color: var(--primary); font-size: 13px;">{{ u.username }}</strong>
+                                {% if u.is_superuser %}
+                                    <span style="font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px;">SUPERUSER</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ u.get_full_name|default:"—" }}</td>
+                    <td>
+                        {% if u.role.role_name == "Admin" %}
+                            <span class="badge badge-primary">Admin</span>
+                        {% elif u.role.role_name == "Governor" %}
+                            <span class="badge" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8;">Governor</span>
+                        {% elif u.role.role_name == "Treasurer" %}
+                            <span class="badge badge-success">Treasurer</span>
+                        {% elif u.role.role_name == "Auditor" %}
+                            <span class="badge badge-warning">Auditor</span>
+                        {% elif u.role.role_name == "Officer" %}
+                            <span class="badge badge-info">Officer</span>
+                        {% elif u.role.role_name == "Adviser" %}
+                            <span class="badge" style="background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe;">Adviser</span>
+                        {% elif u.role.role_name == "Student" %}
+                            <span class="badge badge-neutral">Student</span>
+                        {% else %}
+                            <span class="badge badge-neutral">{{ u.role.role_name|default:"Unassigned" }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--text-muted); font-size: 12.5px;">{{ u.email|default:"None provided" }}</td>
+                    <td>
+                        {% if u.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if u.is_staff %}
+                            <span style="color: var(--success); font-weight: 600; font-size: 12px;">✓ Yes</span>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 12px;">No</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--text-muted); font-size: 12px;">
+                        {{ u.last_login|date:"M d, Y H:i"|default:"Never logged in" }}
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="/admin/accounts/user/{{ u.id }}/change/" class="btn btn-secondary btn-sm" target="_blank" title="Edit in Django Admin">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            <span>Edit</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 35px 20px; color: var(--text-muted);">
+                        No users found matching your search criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,70 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Create Fund Request | CICS SG{% endblock %}
+
+{% block page_heading %}New Fund Request{% endblock %}
+
+{% block navigation %}
+<a href="{% url 'fund_requests_list' %}" class="nav-link">
+    <span>📋</span> My Fund Requests
+</a>
+<a href="{% url 'fund_request_create' %}" class="nav-link active">
+    <span>➕</span> Submit Fund Request
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> My Disbursements
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Initiate Project Expenditure Request</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Select an active budget line item, specify the project purpose, and state the exact requested advance amount.
+        </p>
+    </div>
+    <a href="{% url 'fund_requests_list' %}" class="btn btn-secondary">
+        <span>←</span> Back to Requests
+    </a>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label" for="item">Budget Allocation Item *</label>
+            <select name="item" id="item" class="form-select" required>
+                <option value="">-- Choose Budget Line Item --</option>
+                {% for item in budget_items %}
+                    <option value="{{ item.pk }}">
+                        {{ item.budget.title }} » {{ item.category.category_name }} » {{ item.description }} (Authorized: &#8369;{{ item.allocated_amount|floatformat:2 }})
+                    </option>
+                {% endfor %}
+            </select>
+            <span class="form-text">Choose the approved budget allocation item funding this expenditure.</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="amount">Requested Amount (PHP) *</label>
+            <input type="number" step="0.01" min="1.00" name="amount" id="amount" class="form-control" placeholder="e.g. 2500.00" required>
+            <span class="form-text">Amount must be strictly positive and justifiable with official receipts upon liquidation.</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="purpose">Expenditure Purpose & Project Details *</label>
+            <textarea name="purpose" id="purpose" rows="4" class="form-control" placeholder="Provide a detailed description of the project activity, expected beneficiaries, and specific itemized breakdown of costs..." required></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" name="submit_action" value="save_draft" class="btn btn-secondary">
+                Save as Draft
+            </button>
+            <button type="submit" name="submit_action" value="submit_now" class="btn btn-primary">
+                Submit Directly for Adviser Review ➔
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

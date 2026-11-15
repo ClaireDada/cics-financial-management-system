@@ -1,0 +1,131 @@
+{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Audit Trail & Activity Logs | CICS SG{% endblock %}
+
+{% block page_heading %}System Audit Trail{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Admin" %}
+<a href="/admin/accounts/user/" class="nav-link">
+    <span>👥</span> User Management
+</a>
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'audit_logs' %}" class="nav-link active">
+    <span>📋</span> Audit Logs
+</a>
+<a href="/admin/" class="nav-link">
+    <span>⚙</span> System Administration
+</a>
+{% elif role_name == "Auditor" %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'audit_logs' %}" class="nav-link active">
+    <span>📋</span> Audit Logs
+</a>
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collection Records
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link">
+    <span>📥</span> Turnover Records
+</a>
+<a href="{% url 'budget_list' %}" class="nav-link">
+    <span>💰</span> Budget Records
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>🧾</span> Disbursements
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'audit_logs' %}" class="nav-link active">
+    <span>📋</span> Audit Logs
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Immutable System Activity & Transaction Log</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Permanent tamper-evident audit records capturing every critical financial action and user authorization.
+        </p>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<form method="GET" class="filter-bar">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search description, user, record ID..." style="min-width: 250px;">
+
+    <select name="action">
+        <option value="">All Actions</option>
+        {% for val, label in action_choices %}
+            <option value="{{ val }}" {% if action_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="module">
+        <option value="">All Modules</option>
+        {% for mod in modules %}
+            <option value="{{ mod }}" {% if module_filter == mod %}selected{% endif %}>{{ mod }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn btn-primary btn-sm">Filter Audit Trail</button>
+    {% if search_query or action_filter or module_filter %}
+        <a href="{% url 'audit_logs' %}" class="btn btn-secondary btn-sm">Clear</a>
+    {% endif %}
+</form>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Audit Trail Logs (Showing latest {{ audit_logs.count }} of {{ total_count }})</h3>
+        <span class="badge badge-primary">Read-Only Archive</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Actor / User</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Record ID</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in audit_logs %}
+                <tr>
+                    <td>{{ log.timestamp|date:"M d, Y • H:i:s" }}</td>
+                    <td>
+                        {% if log.user %}
+                            <strong>{{ log.user.get_full_name|default:log.user.username }}</strong>
+                            <br><small style="color: var(--muted);">{{ log.user.role.role_name|default:"User" }}</small>
+                        {% else %}
+                            <em>System / Automated</em>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge {% if log.action in 'CREATE,APPROVE,RELEASE' %}badge-success{% elif log.action in 'REJECT,DELETE' %}badge-danger{% elif log.action == 'UPDATE' %}badge-info{% else %}badge-neutral{% endif %}">
+                            {{ log.get_action_display }}
+                        </span>
+                    </td>
+                    <td><strong>{{ log.module }}</strong></td>
+                    <td><code>#{{ log.record_id }}</code></td>
+                    <td style="max-width: 450px;">{{ log.description }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-state">No audit logs matching criteria.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

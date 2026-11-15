@@ -1,0 +1,61 @@
+/* ============================================================
+   CICS SG — Jazzmin Admin Custom Tweaks
+   Only small refinements on top of jazzmin's base design
+   ============================================================ */
+
+/* ── Match CICS primary navy ── */
+.navbar-dark,
+.main-header.navbar {
+    background-color: #102a45 !important;
+}
+.brand-link, .brand-link:hover {
+    background-color: #0d2238 !important;
+    border-bottom-color: rgba(255,255,255,0.1) !important;
+}
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active,
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:hover {
+    background-color: #164e87 !important;
+    color: #ffffff !important;
+}
+.sidebar-dark-primary {
+    background-color: #102a45 !important;
+}
+.sidebar .nav-link {
+    color: #cbd5e1 !important;
+}
+.sidebar .nav-link:hover {
+    color: #ffffff !important;
+}
+
+/* ── Accent color for buttons ── */
+.btn-primary { background-color: #164e87 !important; border-color: #102a45 !important; }
+.btn-primary:hover { background-color: #102a45 !important; }
+
+/* ── Card headers ── */
+.card-header {
+    background-color: #102a45 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+}
+
+/* ── Top nav links ── */
+.navbar-nav .nav-link {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
+
+/* ── Return to Dashboard button highlight ── */
+.navbar-nav .nav-link[href="/dashboard/"] {
+    background: rgba(255,255,255,0.12) !important;
+    border-radius: 6px !important;
+    padding: 4px 10px !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+/* ── Font ── */
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+}

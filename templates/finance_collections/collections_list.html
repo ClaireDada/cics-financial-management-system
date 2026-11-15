@@ -1,0 +1,124 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Collections & Payments | CICS SG{% endblock %}
+
+{% block page_heading %}Fee Collections & Payments{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Treasurer" %}
+<a href="{% url 'collections_list' %}" class="nav-link active">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'record_payment' %}" class="nav-link">
+    <span>➕</span> Record Payment
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link">
+    <span>📥</span> Turnovers
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> Fund Releases
+</a>
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Reports
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'collections_list' %}" class="nav-link active">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link">
+    <span>📥</span> Turnovers
+</a>
+<a href="{% url 'budget_list' %}" class="nav-link">
+    <span>💰</span> Budgets
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Student Fee Collections & Payment Records</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Total Collected across records: <strong>&#8369;{{ total_amount|floatformat:2 }}</strong>
+        </p>
+    </div>
+    {% if role_name == "Treasurer" or role_name == "Admin" %}
+    <a href="{% url 'record_payment' %}" class="btn btn-primary">
+        <span>➕</span> Record New Payment
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filter Bar -->
+<form method="GET" class="filter-bar">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search OR #, student name, student #..." style="min-width: 250px;">
+
+    <select name="campaign">
+        <option value="">All Campaigns</option>
+        {% for camp in campaigns %}
+            <option value="{{ camp.pk }}" {% if selected_campaign == camp.pk|stringformat:"s" %}selected{% endif %}>
+                {{ camp.campaign_name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    {% if search_query or selected_campaign %}
+        <a href="{% url 'collections_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+    {% endif %}
+</form>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Recorded Collections</h3>
+        <span class="badge badge-primary">{{ collections.count }} Payment{{ collections.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Receipt (OR #)</th>
+                    <th>Student Name</th>
+                    <th>Student #</th>
+                    <th>Campaign Fee</th>
+                    <th>Amount Paid</th>
+                    <th>Payment Date</th>
+                    <th>Collecting Officer</th>
+                    <th>Turnover Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for col in collections %}
+                <tr>
+                    <td><strong>#{{ col.collection_id }}</strong></td>
+                    <td><strong>{{ col.or_number|default:"Receipt Issued" }}</strong></td>
+                    <td>{{ col.obligation.student.full_name }}</td>
+                    <td><code>{{ col.obligation.student.student_no }}</code></td>
+                    <td>{{ col.obligation.campaign.campaign_name }}</td>
+                    <td><strong style="color: #168653;">&#8369;{{ col.amount|floatformat:2 }}</strong></td>
+                    <td>{{ col.payment_date|date:"M d, Y" }}</td>
+                    <td>{{ col.collected_by.get_full_name|default:col.collected_by.username }}</td>
+                    <td>
+                        {% if col.turnover %}
+                            <span class="badge {% if col.turnover.status == 'Received' %}badge-success{% elif col.turnover.status == 'Disputed' %}badge-danger{% else %}badge-warning{% endif %}">
+                                Turnover #{{ col.turnover.turnover_id }} ({{ col.turnover.status }})
+                            </span>
+                        {% else %}
+                            <span class="badge badge-neutral">On Hand (Unturned)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="empty-state">No payment records found matching criteria.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

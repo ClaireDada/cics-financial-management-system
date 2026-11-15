@@ -1,0 +1,212 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Officer Dashboard | CICS SG{% endblock %}
+
+{% block page_heading %}Officer Dashboard{% endblock %}
+
+{% block navigation %}
+<a href="{% url 'fund_requests_list' %}" class="nav-link {% if request.resolver_match.url_name == 'fund_requests_list' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        <path d="M9 14l2 2 4-4"></path>
+    </svg>
+    <span>My Fund Requests</span>
+</a>
+<a href="{% url 'fund_request_create' %}" class="nav-link {% if request.resolver_match.url_name == 'fund_request_create' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="16"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+    </svg>
+    <span>Submit Fund Request</span>
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link {% if request.resolver_match.url_name == 'disbursements_list' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+        <line x1="6" y1="8" x2="18" y2="8"></line>
+        <line x1="6" y1="12" x2="18" y2="12"></line>
+        <line x1="6" y1="16" x2="12" y2="16"></line>
+    </svg>
+    <span>Disbursements</span>
+</a>
+<a href="{% url 'liquidations_list' %}" class="nav-link {% if request.resolver_match.url_name == 'liquidations_list' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"></path>
+        <line x1="8" y1="8" x2="16" y2="8"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+    </svg>
+    <span>Liquidations</span>
+</a>
+<a href="{% url 'returns_list' %}" class="nav-link {% if request.resolver_match.url_name == 'returns_list' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 14 4 9 9 4"></polyline>
+        <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+    </svg>
+    <span>Fund Returns</span>
+</a>
+<a href="{% url 'turnover_submit' %}" class="nav-link {% if request.resolver_match.url_name == 'turnover_submit' %}active{% endif %}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+    </svg>
+    <span>Submit Turnover</span>
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>My Activity Operations & Budget Accountabilities</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Manage your project requests, liquidations, and fund returns for CICS student activities
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{% url 'fund_request_create' %}" class="btn btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            <span>New Fund Request</span>
+        </a>
+        <a href="{% url 'disbursements_list' %}" class="btn btn-secondary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"></path><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            <span>Record Liquidation</span>
+        </a>
+    </div>
+</div>
+
+<!-- Officer Financial Position Cards -->
+<div class="dashboard-grid">
+    <div class="dashboard-card" style="border-top: 4px solid var(--primary);">
+        <h3>My Fund Requests</h3>
+        <div class="value">{{ my_requests_count }}</div>
+        <p>{{ my_pending_count }} pending approval • {{ my_drafts_count }} draft{{ my_drafts_count|pluralize }}</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid #168653;">
+        <h3>Approved & Released</h3>
+        <div class="value" style="color: #168653;">{{ my_approved_count }}</div>
+        <p>Requests authorized by Governor / Treasurer</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid #1e416b;">
+        <h3>Funds Received</h3>
+        <div class="value">&#8369;{{ my_total_released|floatformat:2 }}</div>
+        <p>Total cash released to you for projects</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid #d97706;">
+        <h3>Liquidated Expenses</h3>
+        <div class="value" style="color: #b45309;">&#8369;{{ my_total_expenses|floatformat:2 }}</div>
+        <p>Documented expenses backed by receipts</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid #0284c7;">
+        <h3>Returned Balances</h3>
+        <div class="value" style="color: #0284c7;">&#8369;{{ my_total_returns|floatformat:2 }}</div>
+        <p>Unused cash returned to the Treasurer</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid {% if my_remaining_cash > 0 %}#c94343{% else %}#168653{% endif %};">
+        <h3>Remaining Cash Advance</h3>
+        <div class="value" style="color: {% if my_remaining_cash > 0 %}#c94343{% else %}#168653{% endif %};">
+            &#8369;{{ my_remaining_cash|floatformat:2 }}
+        </div>
+        <p>Outstanding balance to liquidate or return</p>
+    </div>
+</div>
+
+<!-- My Recent Fund Requests -->
+<div class="table-card" style="margin-top: 25px;">
+    <div class="table-header-bar">
+        <h3>My Fund Requests</h3>
+        <a href="{% url 'fund_requests_list' %}" class="btn btn-secondary btn-sm">View All Requests</a>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Req #</th>
+                    <th>Budget Allocation Item</th>
+                    <th>Purpose</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in my_recent_requests %}
+                <tr>
+                    <td><strong>#{{ req.request_id }}</strong></td>
+                    <td>{{ req.item.description }}</td>
+                    <td>{{ req.purpose|truncatechars:40 }}</td>
+                    <td><strong style="color: var(--primary);">&#8369;{{ req.amount|floatformat:2 }}</strong></td>
+                    <td>
+                        <span class="badge {% if req.status == 'Released' or req.status == 'Governor Approved' %}badge-success{% elif req.status == 'Rejected' %}badge-danger{% elif req.status == 'Draft' %}badge-neutral{% else %}badge-warning{% endif %}">
+                            {{ req.status }}
+                        </span>
+                    </td>
+                    <td>{{ req.requested_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=req.request_id %}" class="btn btn-secondary btn-sm">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <span class="empty-state-icon">📝</span>
+                        <p>You haven't created any fund requests yet. Click "New Fund Request" to start.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Active Disbursements Requiring Liquidation or Return -->
+{% if my_disbursements %}
+<div class="table-card" style="margin-top: 25px;">
+    <div class="table-header-bar">
+        <h3>My Active Disbursements & Liquidations</h3>
+        <a href="{% url 'disbursements_list' %}" class="btn btn-secondary btn-sm">All Disbursements</a>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Voucher #</th>
+                    <th>Purpose / Request</th>
+                    <th>Released Amount</th>
+                    <th>Date Released</th>
+                    <th>Quick Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in my_disbursements %}
+                <tr>
+                    <td><strong>{{ d.voucher_number }}</strong></td>
+                    <td>{{ d.request.purpose|truncatechars:45 }}</td>
+                    <td><strong style="color: var(--primary);">&#8369;{{ d.amount_released|floatformat:2 }}</strong></td>
+                    <td>{{ d.released_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="{% url 'record_liquidation' disbursement_id=d.disbursement_id %}" class="btn btn-primary btn-sm">
+                                + Add Expense
+                            </a>
+                            <a href="{% url 'record_fund_return' disbursement_id=d.disbursement_id %}" class="btn btn-secondary btn-sm">
+                                Return Cash
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

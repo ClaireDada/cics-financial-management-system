@@ -1,0 +1,155 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Fund Requests | CICS SG{% endblock %}
+
+{% block page_heading %}Fund Requests{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Officer" %}
+<a href="{% url 'fund_requests_list' %}" class="nav-link active">
+    <span>📋</span> My Fund Requests
+</a>
+<a href="{% url 'fund_request_create' %}" class="nav-link">
+    <span>➕</span> Submit Fund Request
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> My Disbursements
+</a>
+{% elif role_name == "Adviser" %}
+<a href="{% url 'fund_requests_list' %}?filter=pending_adviser" class="nav-link active">
+    <span>📋</span> Pending Requests
+</a>
+<a href="{% url 'fund_requests_list' %}?filter=reviewed_adviser" class="nav-link">
+    <span>✅</span> Reviewed Requests
+</a>
+<a href="{% url 'notifications_list' %}" class="nav-link">
+    <span>🔔</span> Notifications
+</a>
+{% elif role_name == "Governor" %}
+<a href="{% url 'fund_requests_list' %}?filter=pending_governor" class="nav-link active">
+    <span>📋</span> Fund Requests Review
+</a>
+<a href="{% url 'budget_list' %}" class="nav-link">
+    <span>💰</span> Budget Overview
+</a>
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Reports
+</a>
+{% elif role_name == "Treasurer" %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'fund_requests_list' %}?filter=ready_to_release" class="nav-link active">
+    <span>💰</span> Fund Requests
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>🧾</span> Disbursements
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'fund_requests_list' %}" class="nav-link active">
+    <span>📋</span> Fund Requests
+</a>
+<a href="{% url 'audit_logs' %}" class="nav-link">
+    <span>📋</span> Audit Logs
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Fund Request Tracking</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Complete lifecycle: Draft ➔ Submitted ➔ Adviser Endorsement ➔ Governor Authorization ➔ Treasurer Disbursement
+        </p>
+    </div>
+    {% if role_name == "Officer" %}
+    <a href="{% url 'fund_request_create' %}" class="btn btn-primary">
+        <span>➕</span> New Fund Request
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filter Bar -->
+<form method="GET" class="filter-bar">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search by purpose, officer, item..." style="min-width: 250px;">
+
+    <select name="status">
+        <option value="">All Statuses</option>
+        {% for val, label in statuses %}
+            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    {% if role_name == "Officer" %}
+    <select name="filter">
+        <option value="my_requests" {% if filter_type == 'my_requests' %}selected{% endif %}>My Requests Only</option>
+        <option value="all_college" {% if filter_type == 'all_college' %}selected{% endif %}>All College Requests</option>
+    </select>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    {% if search_query or status_filter or filter_type != 'all' %}
+        <a href="{% url 'fund_requests_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+    {% endif %}
+</form>
+
+<!-- Fund Requests Table -->
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Fund Requests</h3>
+        <span class="badge badge-primary">{{ fund_requests.count }} Record{{ fund_requests.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Req #</th>
+                    <th>Requested By</th>
+                    <th>Budget Allocation Item</th>
+                    <th>Purpose Summary</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Requested Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in fund_requests %}
+                <tr>
+                    <td><strong>#{{ req.request_id }}</strong></td>
+                    <td>{{ req.requested_by.get_full_name|default:req.requested_by.username }}</td>
+                    <td>
+                        <strong>{{ req.item.description }}</strong>
+                        <br><small style="color: var(--muted);">{{ req.item.budget.title }}</small>
+                    </td>
+                    <td>{{ req.purpose|truncatechars:45 }}</td>
+                    <td><strong style="color: var(--primary);">&#8369;{{ req.amount|floatformat:2 }}</strong></td>
+                    <td>
+                        <span class="badge {% if req.status == 'Released' or req.status == 'Governor Approved' %}badge-success{% elif req.status == 'Rejected' %}badge-danger{% elif req.status == 'Draft' %}badge-neutral{% else %}badge-warning{% endif %}">
+                            {{ req.status }}
+                        </span>
+                    </td>
+                    <td>{{ req.requested_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=req.request_id %}" class="btn btn-secondary btn-sm">
+                            Inspect
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <span class="empty-state-icon">📋</span>
+                        <p>No fund requests found matching your filter criteria.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

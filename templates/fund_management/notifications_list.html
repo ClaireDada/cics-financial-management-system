@@ -1,0 +1,95 @@
+{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Notifications | CICS SG{% endblock %}
+
+{% block page_heading %}Adviser Notifications{% endblock %}
+
+{% block navigation %}
+<a href="{% url 'fund_requests_list' %}?filter=pending_adviser" class="nav-link">
+    <span>📋</span> Pending Requests
+</a>
+<a href="{% url 'fund_requests_list' %}?filter=reviewed_adviser" class="nav-link">
+    <span>✅</span> Reviewed Requests
+</a>
+<a href="{% url 'approvals_list' %}" class="nav-link">
+    <span>📊</span> Approval History
+</a>
+<a href="{% url 'notifications_list' %}" class="nav-link active">
+    <span>🔔</span> Notifications
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Adviser System & Bypass Notifications</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Immediate alerts dispatched when the Governor invokes the direct authorization protocol.
+        </p>
+    </div>
+    {% if notifications %}
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" name="mark_all_read" value="1" class="btn btn-secondary">
+            Mark All as Read
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Notification Center</h3>
+        <span class="badge badge-primary">{{ notifications.count }} Alert{{ notifications.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date / Time</th>
+                    <th>Related Request</th>
+                    <th>Alert Message</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in notifications %}
+                <tr style="{% if not n.is_read %}background: #fffdf5;{% endif %}">
+                    <td>{{ n.created_at|date:"M d, Y • H:i" }}</td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=n.request_id %}">
+                            <strong>Request #{{ n.request_id }}</strong>
+                        </a>
+                    </td>
+                    <td>{{ n.message }}</td>
+                    <td>
+                        {% if n.is_read %}
+                            <span class="badge badge-neutral">Read</span>
+                        {% else %}
+                            <span class="badge badge-warning">Unread</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not n.is_read %}
+                        <form method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="notification_id" value="{{ n.notification_id }}">
+                            <button type="submit" class="btn btn-secondary btn-sm">Mark Read</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <span class="empty-state-icon">🔔</span>
+                        <p>No notifications received. You are all caught up!</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

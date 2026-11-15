@@ -1,0 +1,135 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Collection Turnovers | CICS SG{% endblock %}
+
+{% block page_heading %}Collection Turnovers{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Treasurer" %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link active">
+    <span>📥</span> Turnovers
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> Fund Releases
+</a>
+{% elif role_name == "Officer" %}
+<a href="{% url 'fund_requests_list' %}" class="nav-link">
+    <span>📋</span> My Fund Requests
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link active">
+    <span>📥</span> My Turnovers
+</a>
+<a href="{% url 'turnover_submit' %}" class="nav-link">
+    <span>➕</span> Submit Turnover
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link active">
+    <span>📥</span> Turnovers
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Collector-to-Treasurer Cash Turnovers</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Verification process comparing declared collections vs. physical cash counted by the Treasurer.
+        </p>
+    </div>
+    {% if role_name == "Officer" or role_name == "Treasurer" %}
+    <a href="{% url 'turnover_submit' %}" class="btn btn-primary">
+        <span>➕</span> Submit Cash Turnover
+    </a>
+    {% endif %}
+</div>
+
+<!-- Turnover KPI Cards -->
+<div class="dashboard-grid">
+    <div class="dashboard-card" style="border-top: 4px solid var(--accent);">
+        <h3>Pending Verification</h3>
+        <div class="value">{{ pending_count }}</div>
+        <p>Awaiting physical count and acknowledgment by Treasurer</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid {% if disputed_count > 0 %}#c94343{% else %}#168653{% endif %};">
+        <h3>Disputed Discrepancies</h3>
+        <div class="value" style="color: {% if disputed_count > 0 %}#c94343{% else %}#168653{% endif %};">
+            {{ disputed_count }}
+        </div>
+        <p>Turnovers where received cash differed from declared amount</p>
+    </div>
+</div>
+
+<div class="table-card" style="margin-top: 25px;">
+    <div class="table-header-bar">
+        <h3>Turnover Submissions Ledger</h3>
+        <span class="badge badge-primary">{{ turnovers.count }} Record{{ turnovers.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Turnover #</th>
+                    <th>Submitted By</th>
+                    <th>Declared Amount</th>
+                    <th>Received Amount</th>
+                    <th>Status</th>
+                    <th>Submitted At</th>
+                    <th>Treasurer Verified By</th>
+                    <th>Remarks</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in turnovers %}
+                <tr>
+                    <td><strong>#{{ t.turnover_id }}</strong></td>
+                    <td>{{ t.submitted_by.get_full_name|default:t.submitted_by.username }}</td>
+                    <td><strong style="color: var(--primary);">&#8369;{{ t.declared_amount|floatformat:2 }}</strong></td>
+                    <td>
+                        {% if t.received_amount is not None %}
+                            <strong style="color: {% if t.received_amount == t.declared_amount %}#168653{% else %}#c94343{% endif %};">
+                                &#8369;{{ t.received_amount|floatformat:2 }}
+                            </strong>
+                        {% else %}
+                            <span style="color: var(--muted);">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge {% if t.status == 'Received' %}badge-success{% elif t.status == 'Disputed' %}badge-danger{% else %}badge-warning{% endif %}">
+                            {{ t.status }}
+                        </span>
+                    </td>
+                    <td>{{ t.submitted_at|date:"M d, Y • H:i" }}</td>
+                    <td>{{ t.received_by.get_full_name|default:t.received_by.username|default:"Pending" }}</td>
+                    <td>{{ t.remarks|default:"None" }}</td>
+                    <td>
+                        {% if role_name == "Treasurer" and t.status == "Pending" %}
+                            <a href="{% url 'turnover_verify' turnover_id=t.turnover_id %}" class="btn btn-primary btn-sm">
+                                Count & Verify
+                            </a>
+                        {% else %}
+                            <span style="color: var(--muted); font-size: 12px;">Archived</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="empty-state">No turnover submissions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

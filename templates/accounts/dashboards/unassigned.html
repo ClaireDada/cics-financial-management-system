@@ -1,0 +1,30 @@
+
+{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Account Not Assigned | CICS SG{% endblock %}
+
+{% block page_heading %}Account Access{% endblock %}
+
+{% block navigation %}
+{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="dashboard-card" style="text-align: center; padding: 45px 25px;">
+
+    <h2 style="color: #c94343; margin-bottom: 15px;">
+        No System Role Assigned
+    </h2>
+
+    <p style="color: #788596; line-height: 1.8;">
+        Your account has not yet been assigned a role in the
+        CICS Student Government Financial Management System.
+    </p>
+
+    <p style="margin-top: 15px;">
+        Please contact the system administrator to request access.
+    </p>
+
+</div>
+
+{% endblock %}

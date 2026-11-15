@@ -1,0 +1,73 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Collection Campaigns | CICS SG{% endblock %}
+
+{% block page_heading %}Collection Campaigns{% endblock %}
+
+{% block navigation %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'campaigns_list' %}" class="nav-link active">
+    <span>📢</span> Campaigns
+</a>
+<a href="{% url 'turnovers_list' %}" class="nav-link">
+    <span>📥</span> Turnovers
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Authorized Student Fee Campaigns</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Active and archived student contribution collection drives for academic terms.
+        </p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Campaigns Roster</h3>
+        <span class="badge badge-primary">{{ campaigns.count }} Campaign{{ campaigns.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Campaign Name</th>
+                    <th>Fee Type</th>
+                    <th>Default Amount</th>
+                    <th>Academic Term</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Total Students Assigned</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in campaigns %}
+                <tr>
+                    <td><strong>{{ c.campaign_name }}</strong></td>
+                    <td>{{ c.fee_type.fee_name }}</td>
+                    <td>&#8369;{{ c.fee_type.default_amount|floatformat:2 }}</td>
+                    <td>{{ c.term }}</td>
+                    <td>{{ c.start_date|date:"M d, Y" }}</td>
+                    <td>{{ c.end_date|date:"M d, Y" }}</td>
+                    <td>{{ c.obligations.count }} student{{ c.obligations.count|pluralize }}</td>
+                    <td>
+                        <span class="badge {% if c.status == 'Active' %}badge-success{% elif c.status == 'Completed' %}badge-info{% else %}badge-neutral{% endif %}">
+                            {{ c.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state">No campaigns registered.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

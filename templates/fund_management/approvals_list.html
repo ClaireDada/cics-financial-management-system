@@ -1,0 +1,114 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Approval History | CICS SG{% endblock %}
+
+{% block page_heading %}Approval History{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Governor" %}
+<a href="{% url 'fund_requests_list' %}?filter=pending_governor" class="nav-link">
+    <span>📋</span> Fund Requests Review
+</a>
+<a href="{% url 'budget_list' %}" class="nav-link">
+    <span>💰</span> Budget Overview
+</a>
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Reports
+</a>
+<a href="{% url 'approvals_list' %}" class="nav-link active">
+    <span>📝</span> Approval History
+</a>
+{% elif role_name == "Adviser" %}
+<a href="{% url 'fund_requests_list' %}?filter=pending_adviser" class="nav-link">
+    <span>📋</span> Pending Requests
+</a>
+<a href="{% url 'fund_requests_list' %}?filter=reviewed_adviser" class="nav-link">
+    <span>✅</span> Reviewed Requests
+</a>
+<a href="{% url 'approvals_list' %}" class="nav-link active">
+    <span>📊</span> Approval History
+</a>
+<a href="{% url 'notifications_list' %}" class="nav-link">
+    <span>🔔</span> Notifications
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'fund_requests_list' %}" class="nav-link">
+    <span>📋</span> Fund Requests
+</a>
+<a href="{% url 'approvals_list' %}" class="nav-link active">
+    <span>📝</span> Approval History
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Formal Review & Decision Audit Trail</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Complete log of Faculty Adviser endorsements and Governor executive authorizations.
+        </p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Approval Decisions Log</h3>
+        <span class="badge badge-primary">{{ approvals.count }} Decision{{ approvals.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Decided Date</th>
+                    <th>Stage</th>
+                    <th>Request #</th>
+                    <th>Requester</th>
+                    <th>Decision</th>
+                    <th>Reviewer</th>
+                    <th>Adviser Bypassed?</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in approvals %}
+                <tr>
+                    <td>{{ a.decided_at|date:"M d, Y • H:i" }}</td>
+                    <td><strong>{{ a.approval_stage }}</strong></td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=a.request.request_id %}">
+                            <strong>#{{ a.request.request_id }}</strong> (&#8369;{{ a.request.amount|floatformat:2 }})
+                        </a>
+                    </td>
+                    <td>{{ a.request.requested_by.get_full_name|default:a.request.requested_by.username }}</td>
+                    <td>
+                        <span class="badge {% if a.decision == 'Approved' %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ a.decision }}
+                        </span>
+                    </td>
+                    <td>{{ a.approver.get_full_name|default:a.approver.username }}</td>
+                    <td>
+                        {% if a.adviser_bypassed %}
+                            <span class="badge badge-warning">YES</span>
+                            {% if a.bypass_reason %}
+                                <br><small style="color: #c94343;">{{ a.bypass_reason }}</small>
+                            {% endif %}
+                        {% else %}
+                            <span style="color: var(--muted);">No</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ a.remarks|default:"None" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state">No approval records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Student Payment Statement | CICS SG{% endblock %}
+
+{% block page_heading %}Student Payment Statement{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Student" %}
+<a href="{% url 'student_payment_status' %}" class="nav-link active">
+    <span>💵</span> My Payment Status
+</a>
+<a href="{% url 'student_summary' %}" class="nav-link">
+    <span>📊</span> Financial Summaries
+</a>
+{% else %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'student_list' %}" class="nav-link">
+    <span>👥</span> Students Directory
+</a>
+<a href="{% url 'student_payment_status' %}" class="nav-link active">
+    <span>📜</span> Payment Statement
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Official Statement of Account & Clearance</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Student No: <strong>{{ student.student_no }}</strong> • Name: <strong>{{ student.full_name }}</strong> • {{ student.program }} (Year {{ student.year_level }}-{{ student.section }})
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="window.print()" class="btn btn-secondary">
+            <span>🖨</span> Print Official Clearance
+        </button>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card" style="border-top: 4px solid var(--primary);">
+        <h3>Assessed Obligations</h3>
+        <div class="value">&#8369;{{ total_required|floatformat:2 }}</div>
+        <p>Total authorized college contributions</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid #168653;">
+        <h3>Total Paid to Date</h3>
+        <div class="value" style="color: #168653;">&#8369;{{ total_paid|floatformat:2 }}</div>
+        <p>Verified payments recorded by Treasurer</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid {% if remaining_balance > 0 %}#c94343{% else %}#168653{% endif %};">
+        <h3>Remaining Balance Due</h3>
+        <div class="value" style="color: {% if remaining_balance > 0 %}#c94343{% else %}#168653{% endif %};">
+            &#8369;{{ remaining_balance|floatformat:2 }}
+        </div>
+        <p>{% if remaining_balance == 0 %}No balance remaining.{% else %}Outstanding payment required.{% endif %}</p>
+    </div>
+
+    <div class="dashboard-card" style="border-top: 4px solid {% if is_compliant %}#168653{% else %}#d97706{% endif %};">
+        <h3>Official Clearance</h3>
+        <div class="value" style="font-size: 20px; color: {% if is_compliant %}#168653{% else %}#d97706{% endif %};">
+            {% if is_compliant %}
+                CLEARED
+            {% else %}
+                NOT CLEARED
+            {% endif %}
+        </div>
+        <p>Semester financial clearance eligibility</p>
+    </div>
+</div>
+
+<div class="table-card" style="margin-top: 25px;">
+    <div class="table-header-bar">
+        <h3>Itemized Fee Assessment & Compliance</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fee Campaign Name</th>
+                    <th>Term</th>
+                    <th>Assessed Due</th>
+                    <th>Amount Paid</th>
+                    <th>Balance Due</th>
+                    <th>Compliance Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ob in obligations %}
+                <tr>
+                    <td><strong>{{ ob.campaign.campaign_name }}</strong></td>
+                    <td>{{ ob.campaign.term }}</td>
+                    <td>&#8369;{{ ob.required_amount|floatformat:2 }}</td>
+                    <td><strong style="color: #168653;">&#8369;{{ ob.total_paid|floatformat:2 }}</strong></td>
+                    <td>
+                        <strong style="color: {% if ob.remaining_balance > 0 %}#c94343{% else %}#168653{% endif %};">
+                            &#8369;{{ ob.remaining_balance|floatformat:2 }}
+                        </strong>
+                    </td>
+                    <td>
+                        <span class="badge {% if ob.compliance_status == 'Complied' %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ ob.compliance_status }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-state">No fee obligations assigned to this student record.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="table-card" style="margin-top: 25px;">
+    <div class="table-header-bar">
+        <h3>Official Receipts & Payment History</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Receipt (OR #)</th>
+                    <th>Campaign Fee</th>
+                    <th>Amount Paid</th>
+                    <th>Payment Date</th>
+                    <th>Received By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td><strong>{{ p.or_number|default:"Receipt Issued" }}</strong></td>
+                    <td>{{ p.obligation.campaign.campaign_name }}</td>
+                    <td><strong style="color: #168653;">&#8369;{{ p.amount|floatformat:2 }}</strong></td>
+                    <td>{{ p.payment_date|date:"M d, Y" }}</td>
+                    <td>{{ p.collected_by.get_full_name|default:p.collected_by.username }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state">No payment transactions recorded.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

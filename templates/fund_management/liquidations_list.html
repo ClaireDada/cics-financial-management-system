@@ -1,0 +1,102 @@
+﻿{% extends "accounts/dashboards/base_dashboard.html" %}
+
+{% block title %}Liquidations & Expense Records | CICS SG{% endblock %}
+
+{% block page_heading %}Liquidations & Expense Records{% endblock %}
+
+{% block navigation %}
+{% if role_name == "Officer" %}
+<a href="{% url 'fund_requests_list' %}" class="nav-link">
+    <span>📋</span> My Fund Requests
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> My Disbursements
+</a>
+<a href="{% url 'liquidations_list' %}" class="nav-link active">
+    <span>🧾</span> Recorded Expenses
+</a>
+{% elif role_name == "Treasurer" %}
+<a href="{% url 'collections_list' %}" class="nav-link">
+    <span>💵</span> Collections
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> Fund Releases
+</a>
+<a href="{% url 'liquidations_list' %}" class="nav-link active">
+    <span>🧾</span> Liquidations
+</a>
+<a href="{% url 'returns_list' %}" class="nav-link">
+    <span>↩</span> Fund Returns
+</a>
+{% else %}
+<a href="{% url 'financial_overview' %}" class="nav-link">
+    <span>📊</span> Financial Overview
+</a>
+<a href="{% url 'disbursements_list' %}" class="nav-link">
+    <span>💰</span> Disbursements
+</a>
+<a href="{% url 'liquidations_list' %}" class="nav-link active">
+    <span>🧾</span> Liquidations
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="section-header">
+    <div>
+        <h3>Documented Expenses & Receipts</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">
+            Official liquidation records submitted by officers against disbursed project funds.
+        </p>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-header-bar">
+        <h3>Liquidations Ledger</h3>
+        <span class="badge badge-primary">{{ liquidations.count }} Record{{ liquidations.count|pluralize }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Voucher #</th>
+                    <th>Expense Description</th>
+                    <th>Amount Spent</th>
+                    <th>Recorded By</th>
+                    <th>Attached Receipts</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in liquidations %}
+                <tr>
+                    <td>{{ l.expense_date|date:"M d, Y" }}</td>
+                    <td><strong>{{ l.disbursement.voucher_number }}</strong></td>
+                    <td><strong>{{ l.expense_description }}</strong></td>
+                    <td><strong style="color: #b45309;">&#8369;{{ l.amount_spent|floatformat:2 }}</strong></td>
+                    <td>{{ l.recorded_by.get_full_name|default:l.recorded_by.username }}</td>
+                    <td>
+                        {% for r in l.receipts.all %}
+                            <span class="badge badge-neutral">{{ r.receipt_number }} ({{ r.vendor_name|default:"Vendor" }})</span>
+                        {% empty %}
+                            <span style="color: var(--muted); font-size: 12px;">No receipt</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <a href="{% url 'fund_request_detail' request_id=l.disbursement.request_id %}" class="btn btn-secondary btn-sm">
+                            View Request
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-state">No liquidations recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
