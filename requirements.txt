@@ -2,7 +2,7 @@ asgiref
 dj-database-url
 Django
 django-jazzmin
-psycopg-binary
+psycopg[binary]
 python-dotenv
 sqlparse
 tzdata

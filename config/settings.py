@@ -129,8 +129,8 @@ if "test" in sys.argv:
     }
 elif DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
+        "default": dj_database_url.parse(
+            DATABASE_URL.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", ""),
             conn_max_age=600,
             ssl_require=True if "postgresql" in DATABASE_URL else False,
         )
@@ -343,6 +343,7 @@ JAZZMIN_UI_TWEAKS = {
     },
     "actions_sticky_top": True,
 }
+
 
 
 
