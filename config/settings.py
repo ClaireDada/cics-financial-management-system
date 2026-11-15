@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver", "*"]
 
+CSRF_TRUSTED_ORIGINS = ["https://*.vercel.app", "http://127.0.0.1", "http://localhost"]
+
 
 # ==========================================
 # INSTALLED APPLICATIONS
@@ -341,6 +343,7 @@ JAZZMIN_UI_TWEAKS = {
     },
     "actions_sticky_top": True,
 }
+
 
 
 
